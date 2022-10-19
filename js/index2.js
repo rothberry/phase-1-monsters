@@ -1,23 +1,28 @@
+// ! GLOBAL VARIABLES
 const MONSTER_BASE_URL = "http://localhost:3000/monsters/"
 const monsterContainer = document.getElementById("monster-container")
 const monsterForm = document.getElementById("monster-form")
 const back = document.getElementById("back")
 const forward = document.getElementById("forward")
-let pageNum = 1
+let startingIdx = 0
+const limit = 2
+let allMonstersArr = []
 
-// let allMonstersArr =
-
-const fetchMonstersByPage = () => {
-	fetch(MONSTER_BASE_URL + "?_limit=2&_page=" + pageNum)
+const fetchAllMonsters = () => {
+	fetch(MONSTER_BASE_URL)
 		.then((response) => response.json())
 		.then((monsterData) => {
 			console.log(monsterData)
-			resetContainer()
-			monsterData.forEach((monster) => {
-				// create our individual monster card
-				createMonsterCard(monster)
-			})
+			allMonstersArr = monsterData
+			displayMonsters(startingIdx)
 		})
+}
+
+const displayMonsters = (startingIdx) => {
+	resetContainer()
+	for (let i = startingIdx; i < limit + startingIdx; i++) {
+		createMonsterCard(allMonstersArr[i])
+	}
 }
 
 const createMonsterCard = (monster) => {
@@ -59,20 +64,17 @@ const handleForward = () => {
 	// resend the fetch req for the current page plus 1 (if it exists)
 	console.log("FORWARD")
 	// console.log((pageNum += 1))
-	pageNum += 1
-	fetchMonstersByPage()
+	startingIdx += limit
+	displayMonsters(startingIdx)
 }
 
 const handleBack = () => {
 	// resend the fetch req for the current page minus 1 (if it exists)
 	console.log("BACKWARDS")
 	// console.log((pageNum -= 1))
-	pageNum -= 1
-	if (pageNum < 1) {
-		pageNum = 1
-	} else {
-		fetchMonstersByPage()
-	}
+	startingIdx -= limit
+	displayMonsters(startingIdx)
+
 }
 
 const handleAddMonster = (event) => {
@@ -88,7 +90,7 @@ const resetContainer = () => {
 }
 
 const init = () => {
-	fetchMonstersByPage()
+	fetchAllMonsters()
 	monsterForm.addEventListener("submit", handleAddMonster)
 	forward.addEventListener("click", handleForward)
 	back.addEventListener("click", handleBack)
